@@ -3,16 +3,37 @@ package com.mycompany.aopdemo.aspect;
 
 import com.mycompany.aopdemo.Account;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 @Aspect
 @Component
 @Order(1)
 public class MyDemoLoggingAspect {
+
+    private Logger myLogger = Logger.getLogger(getClass().getName());
+
+    //Add @Around advice
+
+    //to handle exceptions proceedingJoinPoints should be put into try\catch. catch block will cathc the exception, then you can modify the result and suppress the exception and just send regualr message to mainAPP.
+    //Or exception could ber rethrowable using 'throw'
+    @Around(value = "execution(* com.mycompany.aopdemo.service.*.getFortune(..))")
+    public Object aroundGetFortune(ProceedingJoinPoint proceedingJoinPoint) throws Throwable   {
+        String method = proceedingJoinPoint.getSignature().toShortString();
+        myLogger.info("@AROUND: executing method: " + method);
+        long begin = System.currentTimeMillis();
+        Object result = proceedingJoinPoint.proceed();
+        result = result+ "asdcad";
+        long end = System.currentTimeMillis();
+        long duration = end - begin;
+        myLogger.info("@AROUND: method duration: " + duration + " ms");
+        return result;
+    }
 
     //Add new @After advice
     @After(value = "execution(* com.mycompany.aopdemo.dao.AccountDAO.findAccounts(..))")
